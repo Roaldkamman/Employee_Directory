@@ -1,6 +1,6 @@
-const APIurl = "https://randomuser.me/api/?results=12";
-const $grid = $('.grid-container');
-const $input = $('.search');
+const APIurl = 'https://randomuser.me/api/?results=12&nat=us&inc=name,location,email,dob,phone,picture&noinfo';
+const grid = document.querySelector('.grid-container');
+const searchInput = document.querySelector('.search');
 
 function mapData(data) {
     const completeData = data.map((employee => {
@@ -43,11 +43,10 @@ async function getEmployees(url) {
 
 function generateHTML(data) {
     const HTML = data.map(employee => {
-        $grid.html("");
         const employeeContainter = document.createElement("section");
-        employeeContainter.addClass("grid-item");
-        $grid.append(employeeContainter);
-        employeeContainter.html(`
+        employeeContainter.classList.add("grid-item");
+        grid.append(employeeContainter);
+        employeeContainter.innerHTML = `
          <div class="employee-card">
             <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image">
             <div>
@@ -73,10 +72,48 @@ function generateHTML(data) {
              </div>
              <p class="next-item">></p>
            </div>
-        `);
+        `;
         return employeeContainter;
     });
     return HTML;
+}
+
+function generateSearchHTML(data) {
+  grid.innerHTML = "";
+  const HTML = data.map(employee => {
+      const employeeContainter = document.createElement("section");
+      employeeContainter.classList.add("grid-item");
+      grid.append(employeeContainter);
+      employeeContainter.innerHTML = `
+       <div class="employee-card popup">
+          <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image popup">
+          <div class="popup">
+            <h2 class="employee-name popup">${employee.name}</h2>
+            <p class="employee-email" popup>${employee.email}</p>
+            <p class="locationCity popup">${employee.locationCity}</p>
+          </div>
+       </div>
+         <div class="overlay">
+           <p class="previous-item"><</p>
+           <div class="overlay-card">
+             <p class="close">X</p>
+             <div>
+               <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image"">
+               <h2 class="employee-name-overlay">${employee.name}</h2>
+               <p class="employee-email">${employee.email}</p>
+               <p class="locationCity">${employee.locationCity}</p>
+               <hr class="overlay-hr">
+               <p class="employee-phone">${employee.phone}</p>
+               <p class="employee-address">${employee.address}</p>
+               <p class="employee-birthday">BirthDay:${employee.birthday}</p>
+             </div>
+           </div>
+           <p class="next-item">></p>
+         </div>
+      `;
+      return employeeContainter;
+  });
+  return HTML;
 }
 
 getEmployees(APIurl)
@@ -84,46 +121,60 @@ getEmployees(APIurl)
  .then(data => {
     generateHTML(data);
     
-    const target = e.target;
-    const targetParent = target.parentNode;
-    const targetSection = targetParent.parentNode;
-    const previousSection = targetSection.previousElementSibling;
-    const previousOverlay = previousSection.children[1];
-    const nextSection = targetSection.nextElementSibling;
-    const nextOverlay = nextSection.children[1];
-
-    $input.keyup(function(e) {
-        const currentValue = $input.value.toLowerCase();
-        if (currentValue !== ""){
+    searchInput.addEventListener("keyup",function(e) {
+        const currentValue = searchInput.value.toLowerCase();
+        if (currentValue !== "") {
           let searched = [];
-          for (let i = 0; i < data.length; i ++){
+          for (let i = 0; i < data.length; i += 1){
             if (data[i].name.toLowerCase().indexOf(currentValue) > -1){
                searched.push(data[i]);
             }
-         } generateHTML(searched);
+         } generateSearchHTML(searched);
 
         } else {
-          generateHTML(data);
+          generateSearchHTML(data);
         }
       });
-    
-      $('.close').click(function() {
-          $('.overlay').hide();
-      });
-
-      $('.employee-card').click(function(e) {
-          e.target.nextElementSibling.show("fade");
-      });
       
-      $('.next-item').click(function(e) {
-         targetParent.hide();
-         nextOverlay.show();
-      });
+      grid.addEventListener("click", function(e) {
+        if (e.target.classlist.contains("close")) {
+          e.target.parentNode.parentNode.style.visibility = "hidden";
+        }
 
-      $('.previous-item').click(function(e) {
-        targetParent.hide();
-        previousOverlay.show();
-     });
-        
+        if (e.target.classlist.contains("popup")) {
+          if (e.target.classlist.contains("employee-card")) {
+            e.target.nextElementSibling.style.visibility = "visible";
+          }
+          if (e.target.closest(".employee-card")) {
+            e.target.closest(".employee-card").nextElementSibling.style.visibility = "visible";
+          }
+        }
+
+        if (e.target.classlist.contains("next-item")) {
+          const target = e.target;
+          const targetParent = target.parentNode;
+          const targetSection = targetParent.parentNode;
+          const nextSection = targetSection.nextElementSibling;
+          if (nextSection) {
+            const nextOverlay = nextSection.children[1];
+            targetParent.style.visibility = "hidden";
+            nextOverlay.style.visibility = "visible";
+          }
+        } 
+
+        if (e.target.classList.contains("previous-item")) {
+          const target = e.target;
+          const targetParent = target.parentNode;
+          const targetSection = targetParent.parentNode;
+          const previousSection = targetSection.previousElementSibling;
+          if(previousSection) {
+            const previousOverlay = previousSection.children[1];
+            targetParent.style.visibility = "hidden";
+            previousOverlay.style.visibility = "visible";
+          }
+        }
+      })
+
+      
 })
 .catch(err => console.log("an error occurred",err));
