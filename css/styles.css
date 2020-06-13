@@ -67,6 +67,7 @@ header {
     cursor: pointer;
     transition: .3s;
     box-shadow: 1px 1px lightgrey;
+    max-width: 600px;
 }
 
 .employee-card:hover {
