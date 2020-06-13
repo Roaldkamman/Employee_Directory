@@ -42,17 +42,18 @@ async function getEmployees(url) {
 }
 
 function generateHTML(data) {
+    grid.innerHTML = "";
     const HTML = data.map(employee => {
         const employeeContainter = document.createElement("section");
         employeeContainter.classList.add("grid-item");
         grid.append(employeeContainter);
         employeeContainter.innerHTML = `
-         <div class="employee-card">
-            <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image">
-            <div>
-              <h2 class="employee-name">${employee.name}</h2>
-              <p class="employee-email">${employee.email}</p>
-              <p class="locationCity">${employee.locationCity}</p>
+         <div class="employee-card popup">
+            <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image popup">
+            <div class="popup">
+              <h2 class="employee-name popup">${employee.name}</h2>
+              <p class="employee-email popup">${employee.email}</p>
+              <p class="locationCity popup">${employee.locationCity}</p>
             </div>
          </div>
            <div class="overlay">
@@ -78,44 +79,6 @@ function generateHTML(data) {
     return HTML;
 }
 
-function generateSearchHTML(data) {
-  grid.innerHTML = "";
-  const HTML = data.map(employee => {
-      const employeeContainter = document.createElement("section");
-      employeeContainter.classList.add("grid-item");
-      grid.append(employeeContainter);
-      employeeContainter.innerHTML = `
-       <div class="employee-card popup">
-          <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image popup">
-          <div class="popup">
-            <h2 class="employee-name popup">${employee.name}</h2>
-            <p class="employee-email" popup>${employee.email}</p>
-            <p class="locationCity popup">${employee.locationCity}</p>
-          </div>
-       </div>
-         <div class="overlay">
-           <p class="previous-item"><</p>
-           <div class="overlay-card">
-             <p class="close">X</p>
-             <div>
-               <img src="${employee.image}" alt="profile picture of ${employee.name}" class="profile-image"">
-               <h2 class="employee-name-overlay">${employee.name}</h2>
-               <p class="employee-email">${employee.email}</p>
-               <p class="locationCity">${employee.locationCity}</p>
-               <hr class="overlay-hr">
-               <p class="employee-phone">${employee.phone}</p>
-               <p class="employee-address">${employee.address}</p>
-               <p class="employee-birthday">BirthDay:${employee.birthday}</p>
-             </div>
-           </div>
-           <p class="next-item">></p>
-         </div>
-      `;
-      return employeeContainter;
-  });
-  return HTML;
-}
-
 getEmployees(APIurl)
  .then(mapData)
  .then(data => {
@@ -129,20 +92,20 @@ getEmployees(APIurl)
             if (data[i].name.toLowerCase().indexOf(currentValue) > -1){
                searched.push(data[i]);
             }
-         } generateSearchHTML(searched);
+         } generateHTML(searched);
 
         } else {
-          generateSearchHTML(data);
+          generateHTML(data);
         }
       });
       
       grid.addEventListener("click", function(e) {
-        if (e.target.classlist.contains("close")) {
+        if (e.target.classList.contains("close")) {
           e.target.parentNode.parentNode.style.visibility = "hidden";
         }
 
-        if (e.target.classlist.contains("popup")) {
-          if (e.target.classlist.contains("employee-card")) {
+        if (e.target.classList.contains("popup")) {
+          if (e.target.classList.contains("employee-card")) {
             e.target.nextElementSibling.style.visibility = "visible";
           }
           if (e.target.closest(".employee-card")) {
@@ -150,7 +113,7 @@ getEmployees(APIurl)
           }
         }
 
-        if (e.target.classlist.contains("next-item")) {
+        if (e.target.classList.contains("next-item")) {
           const target = e.target;
           const targetParent = target.parentNode;
           const targetSection = targetParent.parentNode;
